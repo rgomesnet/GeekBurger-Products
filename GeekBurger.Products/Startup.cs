@@ -39,19 +39,16 @@ namespace GeekBurger.Products
 
             services.AddAutoMapper();
 
-            var databasePath = "%DATABASEPATH%";
-            var connection = Configuration.GetConnectionString("sql")
-                .Replace(databasePath, HostingEnvironment.ContentRootPath);
+            services.AddDbContext<ProductsDbContext>
+                (o => o.UseInMemoryDatabase("geekburger-products"));
 
-            services.AddEntityFrameworkSqlite()
-                .AddDbContext<ProductsDbContext>(o => o.UseSqlite(connection));
 
             services.AddScoped<IProductsRepository, ProductsRepository>();
             services.AddScoped<IProductChangedEventRepository, ProductChangedEventRepository>();
             services.AddScoped<IStoreRepository, StoreRepository>();
-            services.AddSingleton<IProductChangedService, ProductChangedService>();
+            services.AddScoped<IProductChangedService, ProductChangedService>();
 
-            services.AddSingleton<ILogService, LogService>();
+            services.AddScoped<ILogService, LogService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

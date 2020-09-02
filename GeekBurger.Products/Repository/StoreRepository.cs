@@ -15,10 +15,9 @@ namespace GeekBurger.Products.Repository
             _context = context;
         }
 
-
-        public Store GetStoreByName(string name)
+        public Store GetStoreByName(string storeName)
         {
-            return _context.Stores.FirstOrDefault(store => store.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));   
+            return _context.Stores.FirstOrDefault(store => store.Name.Equals(storeName, StringComparison.InvariantCultureIgnoreCase));   
         }
     }
 }

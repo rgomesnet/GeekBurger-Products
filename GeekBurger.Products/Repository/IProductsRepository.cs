@@ -1,7 +1,6 @@
-﻿using System;
+﻿using GeekBurger.Products.Model;
+using System;
 using System.Collections.Generic;
-using GeekBurger.Products.Contract;
-using GeekBurger.Products.Model;
 
 namespace GeekBurger.Products.Repository
 {

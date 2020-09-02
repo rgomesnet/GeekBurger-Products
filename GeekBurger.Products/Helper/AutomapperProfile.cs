@@ -3,11 +3,11 @@ using GeekBurger.Products.Contract;
 using GeekBurger.Products.Model;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace GeekBurger.Products
+namespace GeekBurger.Products.Helper
 {
-    public class AutomapperProfile :Profile
+    public class AutoMapperProfile : Profile
     {
-        public AutomapperProfile()
+        public AutoMapperProfile()
         {
             CreateMap<ProductToUpsert, Product>().AfterMap<MatchStoreFromRepository>();
             CreateMap<Product, ProductToUpsert>();

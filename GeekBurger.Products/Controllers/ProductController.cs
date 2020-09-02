@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using GeekBurger.Products.Contract;
 using GeekBurger.Products.Helper;
@@ -40,7 +43,7 @@ namespace GeekBurger.Products.Controllers
             var product = _mapper.Map<Product>(productToAdd);
 
             if (product.StoreId == Guid.Empty)
-                return new UnprocessableEntityResult(ModelState);
+                return new Helper.UnprocessableEntityResult(ModelState);
 
             _productsRepository.Add(product);
             _productsRepository.Save();
@@ -73,7 +76,7 @@ namespace GeekBurger.Products.Controllers
             product = _mapper.Map(productToUpdate, product);
 
             if (product.StoreId == Guid.Empty)
-                return new UnprocessableEntityResult(ModelState);
+                return new Helper.UnprocessableEntityResult(ModelState);
             
             _productsRepository.Update(product);
             _productsRepository.Save();

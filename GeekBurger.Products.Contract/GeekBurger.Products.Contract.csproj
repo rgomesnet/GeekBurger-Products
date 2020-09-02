@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Description>GeekBurger Products Microservice Contract</Description>
-    <Version>3.0.0</Version>
+    <Description>GeekBurger Products Contract criado em 29/07/2020</Description>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
 </Project>

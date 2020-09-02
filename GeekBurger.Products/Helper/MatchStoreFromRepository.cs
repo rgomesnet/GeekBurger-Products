@@ -3,7 +3,7 @@ using GeekBurger.Products.Contract;
 using GeekBurger.Products.Model;
 using GeekBurger.Products.Repository;
 
-namespace GeekBurger.Products
+namespace GeekBurger.Products.Helper
 {
     public class MatchStoreFromRepository : IMappingAction<ProductToUpsert, Product>
     {
@@ -17,7 +17,7 @@ namespace GeekBurger.Products
         {
             var store = _storeRepository.GetStoreByName(source.StoreName);
 
-            if(store != null)
+            if (store != null)
                 destination.StoreId = store.StoreId;
         }
     }

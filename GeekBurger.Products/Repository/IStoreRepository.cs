@@ -1,11 +1,9 @@
-﻿using GeekBurger.Products.Contract;
-using GeekBurger.Products.Model;
-using System;
+﻿using GeekBurger.Products.Model;
 
 namespace GeekBurger.Products.Repository
 {
     public interface IStoreRepository
     {
-        Store GetStoreByName(string name);
+        Store GetStoreByName(string storeName);
     }
 }

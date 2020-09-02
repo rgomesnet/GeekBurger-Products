@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using AutoMapper;
 using GeekBurger.Products.Contract;
+using GeekBurger.Products.Model;
 using GeekBurger.Products.Repository;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace GeekBurger.Products.Controllers
 {
-
     [Route("api/products")]
     public class ProductsController : Controller
     {
@@ -28,7 +27,7 @@ namespace GeekBurger.Products.Controllers
             var productsByStore = _productsRepository.GetProductsByStoreName(storeName).ToList();
 
             if (productsByStore.Count <= 0)
-                return NotFound();
+                return NotFound("Nenhum dado encontrado");
 
             var productsToGet = _mapper.Map<IEnumerable<ProductToGet>>(productsByStore);
 
