@@ -20,7 +20,7 @@ namespace GeekBurger.Products.Service
 {
     public class ProductChangedService : IProductChangedService
     {
-        private const string Topic = "ProductChanged";
+        private const string Topic = "ProductChangedTopic";
         private readonly IConfiguration _configuration;
         private IMapper _mapper;
         private readonly List<Message> _messages;
@@ -62,23 +62,30 @@ namespace GeekBurger.Products.Service
 
         private void AddOrUpdateEvent(ProductChangedEvent productChangedEvent)
         {
-            using (var scope = _serviceProvider.CreateScope())
+            try
             {
-                var scopedProcessingService =
-                    scope.ServiceProvider
-                        .GetRequiredService<IProductChangedEventRepository>();
-
-                ProductChangedEvent evt;
-                if (productChangedEvent.EventId == Guid.Empty 
-                    || (evt = scopedProcessingService.Get(productChangedEvent.EventId)) == null)
-                    scopedProcessingService.Add(productChangedEvent);
-                else
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    evt.MessageSent = true;
-                    scopedProcessingService.Update(evt);
-                }
+                    var scopedProcessingService =
+                        scope.ServiceProvider
+                            .GetRequiredService<IProductChangedEventRepository>();
 
-                scopedProcessingService.Save();
+                    ProductChangedEvent evt;
+                    if (productChangedEvent.EventId == Guid.Empty
+                        || (evt = scopedProcessingService.Get(productChangedEvent.EventId)) == null)
+                        scopedProcessingService.Add(productChangedEvent);
+                    else
+                    {
+                        evt.MessageSent = true;
+                        scopedProcessingService.Update(evt);
+                    }
+
+                    scopedProcessingService.Save();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
