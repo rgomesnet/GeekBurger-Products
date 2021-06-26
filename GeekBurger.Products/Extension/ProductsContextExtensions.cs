@@ -3,6 +3,7 @@ using GeekBurger.Products.Repository;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace GeekBurger.Products.Extension
@@ -30,9 +31,9 @@ namespace GeekBurger.Products.Extension
                     }
                 });
 
-            //var productsTxt = File.ReadAllText("products.json");
-            //var products = JsonConvert.DeserializeObject<List<Product>>(productsTxt);
-            //dbContext.Products.AddRange(products);
+            var productsTxt = File.ReadAllText("products.json");
+            var products = JsonConvert.DeserializeObject<List<Product>>(productsTxt);
+            dbContext.Products.AddRange(products);
 
 
             dbContext.SaveChanges();
