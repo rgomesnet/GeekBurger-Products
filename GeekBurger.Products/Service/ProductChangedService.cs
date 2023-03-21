@@ -40,6 +40,7 @@ namespace GeekBurger.Products.Service
 
             _cancelMessages = new CancellationTokenSource();
             _serviceProvider = serviceProvider;
+            EnsureTopicIsCreated();
         }
 
         public async Task EnsureTopicIsCreated()
