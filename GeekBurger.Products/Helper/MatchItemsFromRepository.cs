@@ -15,7 +15,7 @@ namespace GeekBurger.Products.Helper
             _productRepository = productRepository;
         }
 
-        public void Process(ItemToUpsert source, Item destination)
+        public void Process(ItemToUpsert source, Item destination, ResolutionContext context)
         {
             var fullListOfItems =
                 _productRepository.GetFullListOfItems();

@@ -13,7 +13,7 @@ namespace GeekBurger.Products.Helper
             _storeRepository = storeRepository;
         }
 
-        public void Process(ProductToUpsert source, Product destination)
+        public void Process(ProductToUpsert source, Product destination, ResolutionContext context)
         {
             var store = _storeRepository.GetStoreByName(source.StoreName);
 

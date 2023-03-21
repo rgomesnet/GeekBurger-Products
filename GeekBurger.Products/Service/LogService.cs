@@ -2,8 +2,6 @@
 using GeekBurger.Products.Contract;
 using GeekBurger.Products.Model;
 using GeekBurger.Products.Repository;
-using Microsoft.Azure.Management.ServiceBus.Fluent;
-using Microsoft.Azure.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +12,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Messaging.ServiceBus;
+using Azure.Messaging.ServiceBus.Administration;
 
 namespace GeekBurger.Products.Service
 {
@@ -23,38 +23,35 @@ namespace GeekBurger.Products.Service
         private const string Topic = "Log";
         private IConfiguration _configuration;
         private IMapper _mapper;
-        private List<Message> _messages;
+        private List<ServiceBusMessage> _messages;
         private Task _lastTask;
-        private IServiceBusNamespace _namespace;
 
         public LogService(IMapper mapper, IConfiguration configuration)
         {
             _mapper = mapper;
             _configuration = configuration;
-            _messages = new List<Message>();
-            _namespace = _configuration.GetServiceBusNamespace();
+            _messages = new List<ServiceBusMessage>();
             EnsureTopicIsCreated();
         }
 
-        public void EnsureTopicIsCreated()
+        public async Task EnsureTopicIsCreated()
         {
-            if (!_namespace.Topics.List()
-                .Any(topic => topic.Name
-                    .Equals(Topic, StringComparison.InvariantCultureIgnoreCase)))
-                _namespace.Topics.Define(Topic)
-                    .WithSizeInMB(1024).Create();
-
+            var config = _configuration.GetSection("serviceBus").Get<ServiceBusConfiguration>();
+            var adminClient = new ServiceBusAdministrationClient(config.ConnectionString);
+            if (!await adminClient.TopicExistsAsync(Topic))
+                await adminClient.CreateTopicAsync(Topic);
         }
 
-        public Message GetMessage(string message)
-        {
-            var productChangedByteArray = Encoding.UTF8.GetBytes(message);
 
-            return new Message
+        public ServiceBusMessage GetMessage(string message)
+        {
+            var productChangedBinaryData = new BinaryData(Encoding.UTF8.GetBytes(message));
+
+            return new ServiceBusMessage
             {
-                Body = productChangedByteArray,
+                Body = productChangedBinaryData,
                 MessageId = Guid.NewGuid().ToString(),
-                Label = MicroService
+                Subject = MicroService
             };
         }
 
@@ -66,21 +63,22 @@ namespace GeekBurger.Products.Service
                 return;
 
             var config = _configuration.GetSection("serviceBus").Get<ServiceBusConfiguration>();
-            var topicClient = new TopicClient(config.ConnectionString, Topic);
-            
-            _lastTask = SendAsync(topicClient);
+            var client = new ServiceBusClient(config.ConnectionString);
+
+            var topicSender = client.CreateSender(Topic);
+            _lastTask = SendAsync(topicSender);
 
             await _lastTask;
 
-            var closeTask = topicClient.CloseAsync();
+            var closeTask = topicSender.CloseAsync();
             await closeTask;
             HandleException(closeTask);
         }
 
-        public async Task SendAsync(TopicClient topicClient)
+        public async Task SendAsync(ServiceBusSender topicClient)
         {
             int tries = 0;
-            Message message;
+            ServiceBusMessage message;
             while (true)
             {
                 if (_messages.Count <= 0)
@@ -91,7 +89,7 @@ namespace GeekBurger.Products.Service
                     message = _messages.FirstOrDefault();
                 }
 
-                var sendTask = topicClient.SendAsync(message);
+                var sendTask = topicClient.SendMessageAsync(message);
                 await sendTask;
                 var success = HandleException(sendTask);
 
@@ -110,7 +108,7 @@ namespace GeekBurger.Products.Service
             {
                 Console.WriteLine($"Error in SendAsync task: {innerException.Message}. Details:{innerException.StackTrace} ");
 
-                if (innerException is ServiceBusCommunicationException)
+                if (innerException is ServiceBusException)
                     Console.WriteLine("Connection Problem with Host. Internet Connection can be down");
             });
 

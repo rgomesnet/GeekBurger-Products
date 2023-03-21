@@ -11,7 +11,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.Swagger;
 
 namespace GeekBurger.Products
 {
@@ -30,14 +32,15 @@ namespace GeekBurger.Products
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            var mvcCoreBuilder = services.AddMvc();
+            services.AddMvc();
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "Products", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Products", Version = "v1" });
             });
 
-            services.AddAutoMapper();
+            
+            services.AddAutoMapper(typeof(ProductsDbContext));
 
             services.AddDbContext<ProductsDbContext>
                 (o => o.UseInMemoryDatabase("geekburger-products"));
@@ -59,7 +62,12 @@ namespace GeekBurger.Products
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMvc();
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
 
             app.UseSwagger();
 

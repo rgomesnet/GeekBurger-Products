@@ -2,8 +2,7 @@
 using GeekBurger.Products.Contract;
 using GeekBurger.Products.Model;
 using GeekBurger.Products.Repository;
-using Microsoft.Azure.Management.ServiceBus.Fluent;
-using Microsoft.Azure.ServiceBus;
+using Azure.Messaging.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +14,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Azure.Messaging.ServiceBus.Administration;
 
 namespace GeekBurger.Products.Service
 {
@@ -23,9 +23,9 @@ namespace GeekBurger.Products.Service
         private const string Topic = "ProductChangedTopic";
         private readonly IConfiguration _configuration;
         private IMapper _mapper;
-        private readonly List<Message> _messages;
+        private readonly List<ServiceBusMessage> _messages;
         private Task _lastTask;
-        private readonly IServiceBusNamespace _namespace;
+        //private readonly IServiceBusNamespace _namespace;
         private readonly ILogService _logService;
         private CancellationTokenSource _cancelMessages;
         private IServiceProvider _serviceProvider { get; }
@@ -36,28 +36,26 @@ namespace GeekBurger.Products.Service
             _mapper = mapper;
             _configuration = configuration;
             _logService = logService;
-            _messages = new List<Message>();
-            _namespace = _configuration.GetServiceBusNamespace();
+            _messages = new List<ServiceBusMessage>();
+
             _cancelMessages = new CancellationTokenSource();
             _serviceProvider = serviceProvider;
         }
 
-        public void EnsureTopicIsCreated()
+        public async Task EnsureTopicIsCreated()
         {
-            if (!_namespace.Topics.List()
-                .Any(topic => topic.Name
-                    .Equals(Topic, StringComparison.InvariantCultureIgnoreCase)))
-                _namespace.Topics.Define(Topic)
-                    .WithSizeInMB(1024).Create();
-
+            var config = _configuration.GetSection("serviceBus").Get<ServiceBusConfiguration>();
+            var adminClient = new ServiceBusAdministrationClient(config.ConnectionString);
+            if (!await adminClient.TopicExistsAsync(Topic))
+                await adminClient.CreateTopicAsync(Topic);
         }
 
         public void AddToMessageList(IEnumerable<EntityEntry<Product>> changes)
         {
-            _messages.AddRange(changes
-            .Where(entity => entity.State != EntityState.Detached
-                    && entity.State != EntityState.Unchanged)
-            .Select(GetMessage).ToList());
+            _messages.AddRange((IEnumerable<ServiceBusMessage>)changes
+                .Where(entity => entity.State != EntityState.Detached
+                                 && entity.State != EntityState.Unchanged)
+                .Select(GetMessage).ToList());
         }
 
         private void AddOrUpdateEvent(ProductChangedEvent productChangedEvent)
@@ -89,20 +87,21 @@ namespace GeekBurger.Products.Service
             }
         }
 
-        public Message GetMessage(EntityEntry<Product> entity)
+        public ServiceBusMessage GetMessage(EntityEntry<Product> entity)
         {
-            var productChanged = Mapper.Map<ProductChangedMessage>(entity);
+            var productChanged = _mapper.Map<ProductChangedMessage>(entity);
             var productChangedSerialized = JsonConvert.SerializeObject(productChanged);
-            var productChangedByteArray = Encoding.UTF8.GetBytes(productChangedSerialized);
+            var productChangedBinaryData = new BinaryData(Encoding.UTF8.GetBytes(productChangedSerialized));
 
-            var productChangedEvent = Mapper.Map<ProductChangedEvent>(entity);
+            var productChangedEvent = _mapper.Map<ProductChangedEvent>(entity);
             AddOrUpdateEvent(productChangedEvent);
 
-            return new Message
+            return new ServiceBusMessage()
             {
-                Body = productChangedByteArray,
+                Body = productChangedBinaryData,
                 MessageId = productChangedEvent.EventId.ToString(),
-                Label = productChanged.Product.StoreId.ToString()
+                Subject = productChanged.Product.StoreId.ToString(),
+                    
             };
         }
 
@@ -112,20 +111,21 @@ namespace GeekBurger.Products.Service
                 return;
 
             var config = _configuration.GetSection("serviceBus").Get<ServiceBusConfiguration>();
-            var topicClient = new TopicClient(config.ConnectionString, Topic);
+            var client = new ServiceBusClient(config.ConnectionString);
 
             _logService.SendMessagesAsync("Product was changed");
 
-            _lastTask = SendAsync(topicClient, _cancelMessages.Token);
+            var topicSender = client.CreateSender(Topic);
+            _lastTask = SendAsync(topicSender, _cancelMessages.Token);
 
             await _lastTask;
 
-            var closeTask = topicClient.CloseAsync();
+            var closeTask = topicSender.CloseAsync();
             await closeTask;
             HandleException(closeTask);
         }
 
-        public async Task SendAsync(TopicClient topicClient, 
+        public async Task SendAsync(ServiceBusSender topicSender, 
             CancellationToken cancellationToken)
         {
             var tries = 0;
@@ -134,13 +134,13 @@ namespace GeekBurger.Products.Service
                 if (_messages.Count <= 0)
                     break;
 
-                Message message;
+                ServiceBusMessage message;
                 lock (_messages)
                 {
                     message = _messages.FirstOrDefault();
                 }
 
-                var sendTask = topicClient.SendAsync(message);
+                var sendTask = topicSender.SendMessageAsync(message, cancellationToken);
                 await sendTask;
                 var success = HandleException(sendTask);
 
@@ -166,7 +166,7 @@ namespace GeekBurger.Products.Service
             {
                 Console.WriteLine($"Error in SendAsync task: {innerException.Message}. Details:{innerException.StackTrace} ");
 
-                if (innerException is ServiceBusCommunicationException)
+                if (innerException is ServiceBusException)
                     Console.WriteLine("Connection Problem with Host. Internet Connection can be down");
             });
 

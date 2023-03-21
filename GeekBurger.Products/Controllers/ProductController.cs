@@ -71,7 +71,7 @@ namespace GeekBurger.Products.Controllers
             }
 
             var productToUpdate = _mapper.Map<ProductToUpsert>(product);
-            productPatch.ApplyTo<ProductToUpsert>(productToUpdate, ModelState);
+            productPatch.ApplyTo(productToUpdate);
 
             product = _mapper.Map(productToUpdate, product);
 
