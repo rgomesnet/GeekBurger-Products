@@ -25,5 +25,7 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet publish --no-restore -o ./out /p:Version=2.0.${{ github.run_number }}
+    - name: Pack
+      run: dotnet pack --no-restore -o ./nupkgs /p:Version=2.0.${{ github.run_number }}  
     - name: Push nuget
-      run: dotnet nuget push **/*.nupkg ${{ secrets.NUGET_API_KEY}} -source https://fiap22net.azurewebsites.net/nuget
+      run: dotnet nuget push ./nupkgs/*.nupkg ${{ secrets.NUGET_API_KEY}} -source https://fiap22net.azurewebsites.net/nuget
