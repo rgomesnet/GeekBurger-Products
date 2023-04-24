@@ -1,11 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30320.27
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33502.453
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeekBurger.Products", "GeekBurger.Products\GeekBurger.Products.csproj", "{044D956B-0070-4FF2-8034-90050D74E646}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekBurger.Products", "GeekBurger.Products\GeekBurger.Products.csproj", "{044D956B-0070-4FF2-8034-90050D74E646}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeekBurger.Products.Contract", "GeekBurger.Products.Contract\GeekBurger.Products.Contract.csproj", "{B901C50C-8656-4198-B8ED-D2E20DBE2907}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekBurger.Products.Contract", "GeekBurger.Products.Contract\GeekBurger.Products.Contract.csproj", "{B901C50C-8656-4198-B8ED-D2E20DBE2907}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestProject1", "TestProject1\TestProject1.csproj", "{B0E4A74E-8A91-4564-A36A-19BFDD6AFF52}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{43510A2B-A1D6-44CF-AC44-2E3745367A25}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeekBurger.Products.UnitTests", "GeekBurger.Products.UnitTests\GeekBurger.Products.UnitTests.csproj", "{D14D19A9-6521-4B52-8DA2-62421C445DD4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +27,20 @@ Global
 		{B901C50C-8656-4198-B8ED-D2E20DBE2907}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B901C50C-8656-4198-B8ED-D2E20DBE2907}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B901C50C-8656-4198-B8ED-D2E20DBE2907}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0E4A74E-8A91-4564-A36A-19BFDD6AFF52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0E4A74E-8A91-4564-A36A-19BFDD6AFF52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0E4A74E-8A91-4564-A36A-19BFDD6AFF52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0E4A74E-8A91-4564-A36A-19BFDD6AFF52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D14D19A9-6521-4B52-8DA2-62421C445DD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D14D19A9-6521-4B52-8DA2-62421C445DD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D14D19A9-6521-4B52-8DA2-62421C445DD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D14D19A9-6521-4B52-8DA2-62421C445DD4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D14D19A9-6521-4B52-8DA2-62421C445DD4} = {43510A2B-A1D6-44CF-AC44-2E3745367A25}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C17D23AA-4458-4A77-9A03-D610920E2B7A}
