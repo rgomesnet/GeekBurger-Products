@@ -28,7 +28,7 @@ namespace GeekBurger.Products.UnitTests.Controllers
         }
 
         [Fact]
-        public void OnGetProductsByStoreName()
+        public void OnGetProductsByStoreName_WhenListIsEmpty_ShouldReturnNotFound()
         {
             //arrange
             var storeName = "Paulista";
