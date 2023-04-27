@@ -23,6 +23,8 @@ jobs:
         dotnet-version: 6.0.x
     - name: Restore dependencies
       run: dotnet restore
+    - name: Test
+      run: dotnet test
     - name: Build
       run: dotnet publish --no-restore -o ./out /p:Version=2.0.${{ github.run_number }}
     - name: Pack
